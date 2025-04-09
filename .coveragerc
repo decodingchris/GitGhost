@@ -1,0 +1,13 @@
+[run]
+branch = True
+source = gitvault
+omit =
+    */tests/*
+    */.venv/*
+    */venv/*
+    */__init__.py
+    */.cache/*
+
+[report]
+show_missing = True
+fail_under = 80

@@ -182,3 +182,6 @@ memory-bank/
 # GitVault
 .gitvault_private/
 .gitvaultinclude
+
+# VS Code
+.vscode/
