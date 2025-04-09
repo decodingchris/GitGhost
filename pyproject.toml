@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitghost"
-version = "1.0.0"
-description = "A CLI tool to securely manage private files/folders ignored in public git repositories."
+version = "1.0.1"
+description = "Private version control for your Git ignored files."
 authors = [
     { name = "Decoding Chris" }
 ]

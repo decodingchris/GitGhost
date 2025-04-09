@@ -1,6 +1,6 @@
 # GitGhost
 
-A simple CLI tool to securely manage private files and folders ignored in your public Git repositories.
+Private version control for your Git ignored files.
 
 ---
 
@@ -16,9 +16,9 @@ A simple CLI tool to securely manage private files and folders ignored in your p
 
 ## Requirements
 
-- **Python 3.10 or higher**
-- Compatible with Ubuntu/Linux systems
-- An existing Git repository
+- Python 3.10 or higher
+- Git installed
+- GitHub CLI (`gh`) is required for private repo automation
 
 ---
 
