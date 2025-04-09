@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 
-coverage run -m pytest
+PYTHONPATH=. coverage run --source=gitvault -m pytest
 coverage report -m
 coverage html
