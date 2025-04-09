@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = gitvault
+source = gitghost
 omit =
     */tests/*
     */.venv/*

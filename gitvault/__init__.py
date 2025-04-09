@@ -1,1 +1,0 @@
-# GitVault package init

@@ -2,19 +2,19 @@ import os
 import pytest
 from unittest import mock
 from click.testing import CliRunner
-from gitvault import cli
+from gitghost import cli
 
-def test_parse_gitvaultinclude_missing(monkeypatch):
+def test_parse_gitghostinclude_missing(monkeypatch):
     monkeypatch.setattr("os.path.exists", lambda p: False)
     with mock.patch("builtins.print"):
-        files = cli.parse_gitvaultinclude()
+        files = cli.parse_gitghostinclude()
     assert files == []
 
 def test_ensure_private_repo_init_when_missing(monkeypatch):
     monkeypatch.setattr("os.getcwd", lambda: "/tmp/testcwd")
     monkeypatch.setattr("os.path.exists", lambda p: False)
     with mock.patch("os.makedirs") as makedirs_mock, \
-         mock.patch("gitvault.cli.Repo.init") as repo_init_mock:
+         mock.patch("gitghost.cli.Repo.init") as repo_init_mock:
         repo_obj = mock.Mock()
         repo_init_mock.return_value = repo_obj
         repo = cli.ensure_private_repo()
@@ -25,8 +25,8 @@ def test_ensure_private_repo_init_when_missing(monkeypatch):
 def test_ensure_private_repo_fallback_to_init(monkeypatch):
     monkeypatch.setattr("os.getcwd", lambda: "/tmp/testcwd")
     monkeypatch.setattr("os.path.exists", lambda p: True)
-    with mock.patch("gitvault.cli.Repo") as repo_cls, \
-         mock.patch("gitvault.cli.Repo.init") as repo_init_mock:
+    with mock.patch("gitghost.cli.Repo") as repo_cls, \
+         mock.patch("gitghost.cli.Repo.init") as repo_init_mock:
         repo_cls.side_effect = Exception("fail")
         repo_obj = mock.Mock()
         repo_init_mock.return_value = repo_obj
@@ -67,9 +67,9 @@ def test_save_push_error(monkeypatch):
     repo_mock.remotes = []
     repo_mock.active_branch.name = "main"
 
-    with mock.patch("gitvault.cli.ensure_private_repo", return_value=repo_mock), \
-         mock.patch("gitvault.cli.parse_gitvaultinclude", return_value=["secret.txt"]), \
-         mock.patch("gitvault.cli.copy_private_files"), \
+    with mock.patch("gitghost.cli.ensure_private_repo", return_value=repo_mock), \
+         mock.patch("gitghost.cli.parse_gitghostinclude", return_value=["secret.txt"]), \
+         mock.patch("gitghost.cli.copy_private_files"), \
          mock.patch("subprocess.run"), \
          mock.patch("os.path.exists", return_value=True), \
          mock.patch("os.getcwd", return_value="/tmp/testcwd"):
@@ -81,18 +81,18 @@ def test_save_push_error(monkeypatch):
 def test_init_github_cli_missing(monkeypatch):
     monkeypatch.setattr("os.getcwd", lambda: "/tmp/testcwd")
     monkeypatch.setattr("os.path.exists", lambda p: False)
-    with mock.patch("gitvault.cli.Repo.init"), \
-         mock.patch("gitvault.cli.open", mock.mock_open(), create=True), \
+    with mock.patch("gitghost.cli.Repo.init"), \
+         mock.patch("gitghost.cli.open", mock.mock_open(), create=True), \
          mock.patch("subprocess.run", side_effect=FileNotFoundError):
         runner = CliRunner()
         result = runner.invoke(cli.init)
         assert result.exit_code in (0, 1)
 
-def test_parse_gitvaultinclude_with_comments_and_empty(monkeypatch):
+def test_parse_gitghostinclude_with_comments_and_empty(monkeypatch):
     monkeypatch.setattr("os.path.exists", lambda p: True)
     mock_file = mock.mock_open(read_data="# comment line\n\nfile1.txt\n  \n#another\nfile2.txt\n")
     with mock.patch("builtins.open", mock_file):
-        files = cli.parse_gitvaultinclude()
+        files = cli.parse_gitghostinclude()
     assert files == ["file1.txt", "file2.txt"]
 
 def test_status_git_error(monkeypatch):
@@ -100,9 +100,9 @@ def test_status_git_error(monkeypatch):
     repo_mock.head.is_valid.return_value = True
     repo_mock.index.diff.side_effect = cli.GitCommandError("diff", 1)
     
-    with mock.patch("gitvault.cli.ensure_private_repo", return_value=repo_mock), \
-         mock.patch("gitvault.cli.parse_gitvaultinclude", return_value=["secret.txt"]), \
-         mock.patch("gitvault.cli.copy_private_files"), \
+    with mock.patch("gitghost.cli.ensure_private_repo", return_value=repo_mock), \
+         mock.patch("gitghost.cli.parse_gitghostinclude", return_value=["secret.txt"]), \
+         mock.patch("gitghost.cli.copy_private_files"), \
          mock.patch("os.path.exists", return_value=True), \
          mock.patch("os.path.isdir", return_value=False):
         runner = CliRunner()
@@ -123,40 +123,40 @@ def test_init_repo_name_fallback(monkeypatch):
             return mock.Mock(returncode=1)  # Repo doesn't exist
         return mock.Mock(returncode=0)
 
-    with mock.patch("gitvault.cli.Repo", side_effect=Exception("repo error")), \
-         mock.patch("gitvault.cli.open", mock.mock_open(), create=True), \
+    with mock.patch("gitghost.cli.Repo", side_effect=Exception("repo error")), \
+         mock.patch("gitghost.cli.open", mock.mock_open(), create=True), \
          mock.patch("subprocess.run", side_effect=run_side_effect) as subprocess_run:
         runner = CliRunner()
         result = runner.invoke(cli.init)
         assert result.exit_code == 0
         # Check if gh create was called with fallback name
         create_calls = [c for c in subprocess_run.call_args_list if c[0][0][1] == "repo" and c[0][0][2] == "create"]
-        assert any("fallback-name-gitvault" in str(call) for call in create_calls)
+        assert any("fallback-name-gitghost" in str(call) for call in create_calls)
 
 def test_init_gitignore_updating(monkeypatch):
     """Test .gitignore updating with various content states"""
     monkeypatch.setattr("os.getcwd", lambda: "/tmp/testcwd")
     test_cases = [
-        # Case 1: No GitVault entries
+        # Case 1: No GitGhost entries
         "some content\n",
-        # Case 2: Has .gitvault_private/ but not .gitvaultinclude
-        "some content\n.gitvault_private/\n",
-        # Case 3: Has .gitvaultinclude but not .gitvault_private/
-        "some content\n.gitvaultinclude\n",
+        # Case 2: Has .gitghost_private/ but not .gitghostinclude
+        "some content\n.gitghost_private/\n",
+        # Case 3: Has .gitghostinclude but not .gitghost_private/
+        "some content\n.gitghostinclude\n",
         # Case 4: Already has both entries
-        "some content\n.gitvault_private/\n.gitvaultinclude\n"
+        "some content\n.gitghost_private/\n.gitghostinclude\n"
     ]
     
     for content in test_cases:
-        with mock.patch("gitvault.cli.open", mock.mock_open(read_data=content), create=True) as mock_file, \
+        with mock.patch("gitghost.cli.open", mock.mock_open(read_data=content), create=True) as mock_file, \
              mock.patch("os.path.exists", return_value=True), \
-             mock.patch("gitvault.cli.Repo.init"):
+             mock.patch("gitghost.cli.Repo.init"):
             runner = CliRunner()
             result = runner.invoke(cli.init)
             assert result.exit_code == 0
             
             # Check write calls when content needed updating
-            if ".gitvault_private/" not in content or ".gitvaultinclude" not in content:
+            if ".gitghost_private/" not in content or ".gitghostinclude" not in content:
                 mock_file().write.assert_called()
             else:
                 # Both entries present, no update needed
@@ -174,8 +174,8 @@ def test_init_gh_create_error(monkeypatch):
             raise Exception("gh create error")
         return mock.Mock(returncode=1)
     
-    with mock.patch("gitvault.cli.Repo.init"), \
-         mock.patch("gitvault.cli.open", mock.mock_open(), create=True), \
+    with mock.patch("gitghost.cli.Repo.init"), \
+         mock.patch("gitghost.cli.open", mock.mock_open(), create=True), \
          mock.patch("subprocess.run", side_effect=subprocess_run_mock):
         runner = CliRunner()
         result = runner.invoke(cli.init)
@@ -190,7 +190,7 @@ def test_copy_private_files_file_copy_error(monkeypatch):
         return False
     monkeypatch.setattr("os.path.exists", exists_side_effect)
     monkeypatch.setattr("os.path.isdir", lambda p: False)
-    with mock.patch("os.path.dirname", return_value="/tmp/testcwd/.gitvault_private"), \
+    with mock.patch("os.path.dirname", return_value="/tmp/testcwd/.gitghost_private"), \
          mock.patch("os.makedirs"), \
          mock.patch("shutil.copy2", side_effect=Exception("copy error")):
         with pytest.raises(Exception):
@@ -204,7 +204,7 @@ def test_copy_private_files_file_copy(monkeypatch):
         return False
     monkeypatch.setattr("os.path.exists", exists_side_effect)
     monkeypatch.setattr("os.path.isdir", lambda p: False)
-    with mock.patch("os.path.dirname", return_value="/tmp/testcwd/.gitvault_private"), \
+    with mock.patch("os.path.dirname", return_value="/tmp/testcwd/.gitghost_private"), \
          mock.patch("os.makedirs") as makedirs_mock, \
          mock.patch("shutil.copy2") as copy2_mock:
         cli.copy_private_files(["secret_file.txt"])
@@ -225,7 +225,7 @@ def test_discard_confirmed_with_missing_files(monkeypatch):
     monkeypatch.setattr("os.path.exists", lambda p: False)  # Files missing in vault
     
     with mock.patch("builtins.input", return_value="y"), \
-         mock.patch("gitvault.cli.parse_gitvaultinclude", return_value=["file1.txt", "dir1"]), \
+         mock.patch("gitghost.cli.parse_gitghostinclude", return_value=["file1.txt", "dir1"]), \
          mock.patch("subprocess.run"):
         runner = CliRunner()
         result = runner.invoke(cli.discard)
@@ -240,8 +240,8 @@ def test_discard_confirmed_with_files(monkeypatch):
     def exists_side_effect(path):
         # Files in vault that we want to restore
         vault_paths = [
-            "/tmp/testcwd/.gitvault_private/file1.txt",
-            "/tmp/testcwd/.gitvault_private/dir1"
+            "/tmp/testcwd/.gitghost_private/file1.txt",
+            "/tmp/testcwd/.gitghost_private/dir1"
         ]
         # Existing target that needs to be removed
         target_paths = ["/tmp/testcwd/dir1"]
@@ -250,7 +250,7 @@ def test_discard_confirmed_with_files(monkeypatch):
     monkeypatch.setattr("os.path.exists", exists_side_effect)
     
     with mock.patch("builtins.input", return_value="yes"), \
-         mock.patch("gitvault.cli.parse_gitvaultinclude", return_value=["file1.txt", "dir1"]), \
+         mock.patch("gitghost.cli.parse_gitghostinclude", return_value=["file1.txt", "dir1"]), \
          mock.patch("subprocess.run"), \
          mock.patch("os.path.isdir") as isdir_mock, \
          mock.patch("os.makedirs") as makedirs_mock, \

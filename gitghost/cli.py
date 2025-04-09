@@ -4,11 +4,11 @@ import datetime
 import click
 from git import Repo, GitCommandError
 
-GITVAULT_INCLUDE = ".gitvaultinclude"
-PRIVATE_REPO_DIR = ".gitvault_private"
+GITVAULT_INCLUDE = ".gitghostinclude"
+PRIVATE_REPO_DIR = ".gitghost_private"
 
-def parse_gitvaultinclude():
-    """Parse .gitvaultinclude and return list of file paths."""
+def parse_gitghostinclude():
+    """Parse .gitghostinclude and return list of file paths."""
     if not os.path.exists(GITVAULT_INCLUDE):
         click.echo(f"Error: {GITVAULT_INCLUDE} not found.")
         return []
@@ -36,7 +36,7 @@ def ensure_private_repo():
     return repo
 
 def copy_private_files(files):
-    """Copy private files into .gitvault_private/ preserving paths."""
+    """Copy private files into .gitghost_private/ preserving paths."""
     for file_path in files:
         src = os.path.join(os.getcwd(), file_path)
         if not os.path.exists(src):
@@ -54,13 +54,13 @@ def copy_private_files(files):
 
 @click.group()
 def cli():
-    """GitVault CLI - manage private files securely."""
+    """GitGhost CLI - manage private files securely."""
     pass
 
 @cli.command()
 def status():
     """Show status of private files."""
-    files = parse_gitvaultinclude()
+    files = parse_gitghostinclude()
     if not files:
         return
 
@@ -75,7 +75,7 @@ def status():
         click.echo("Private repo is empty. The following files/folders will be added on first save:")
         for f in files:
             click.echo(f"  {f}")
-        click.echo("Run 'gitvault save' to create the initial commit of your private files.")
+        click.echo("Run 'gitghost save' to create the initial commit of your private files.")
         return
     
     changed_files = []
@@ -122,14 +122,18 @@ def save(message):
     """Save changes of private files to private repo."""
     if not message:
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        message = f"GitVault backup on {now}"
-    files = parse_gitvaultinclude()
+        message = f"GitGhost backup on {now}"
+    files = parse_gitghostinclude()
     if not files:
         return
     
     import subprocess
-    # Reset private repo working directory to last commit
-    subprocess.run(["git", "-C", os.path.join(os.getcwd(), PRIVATE_REPO_DIR), "reset", "--hard", "HEAD"], check=True)
+    private_repo_path = os.path.join(os.getcwd(), PRIVATE_REPO_DIR)
+    repo = Repo(private_repo_path)
+    if repo.head.is_valid():
+        subprocess.run(["git", "-C", private_repo_path, "reset", "--hard", "HEAD"], check=True)
+    else:
+        click.echo("Private repo is empty, skipping reset.")
 
     # Copy private files into private repo dir
     copy_private_files(files)
@@ -177,7 +181,7 @@ def discard():
         click.echo("Discard cancelled.")
         return
 
-    files = parse_gitvaultinclude()
+    files = parse_gitghostinclude()
     # Reset private repo working directory to last commit
     import subprocess
     subprocess.run(["git", "-C", os.path.join(os.getcwd(), PRIVATE_REPO_DIR), "reset", "--hard", "HEAD"], check=True)
@@ -205,8 +209,8 @@ def discard():
 
 @cli.command()
 def init():
-    """Initialize GitVault: create .gitvaultinclude, .gitvault_private repo, and update .gitignore."""
-    # Create .gitvaultinclude if missing
+    """Initialize GitGhost: create .gitghostinclude, .gitghost_private repo, and update .gitignore."""
+    # Create .gitghostinclude if missing
     if not os.path.exists(GITVAULT_INCLUDE):
         with open(GITVAULT_INCLUDE, "w") as f:
             f.write("# List private files and folders, one per line\n")
@@ -214,7 +218,7 @@ def init():
     else:
         click.echo(f"{GITVAULT_INCLUDE} already exists.")
 
-    # Create .gitvault_private directory and init repo
+    # Create .gitghost_private directory and init repo
     private_repo_path = os.path.join(os.getcwd(), PRIVATE_REPO_DIR)
     if not os.path.exists(private_repo_path):
         os.makedirs(private_repo_path, exist_ok=True)
@@ -228,7 +232,7 @@ def init():
             Repo.init(private_repo_path)
             click.echo(f"Initialized private repo in {PRIVATE_REPO_DIR}")
 
-    # Add .gitvault_private/ to .gitignore if not present
+    # Add .gitghost_private/ to .gitignore if not present
     # Attempt to create private GitHub repo automatically if gh CLI is available
     import subprocess
 
@@ -243,7 +247,9 @@ def init():
         try:
             repo = Repo(os.getcwd())
             url = next(repo.remote().urls)
-            name = url.rstrip(".git").split("/")[-1]
+            name = url.split("/")[-1]
+            if name.endswith(".git"):
+                name = name[:-4]
             return name
         except Exception:
             # fallback to current directory name
@@ -251,7 +257,7 @@ def init():
 
     private_repo_url = None
     if has_gh():
-        repo_name = get_public_repo_name() + "-gitvault"
+        repo_name = get_public_repo_name() + "-gitghost"
         try:
             # Check if repo already exists
             result = subprocess.run(["gh", "repo", "view", repo_name, "--json", "name"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -273,10 +279,10 @@ def init():
     else:
         click.echo("GitHub CLI (gh) not found. Skipping automatic private repo creation.")
     gitignore_path = os.path.join(os.getcwd(), ".gitignore")
-    vault_block = "# GitVault\n.gitvault_private/\n.gitvaultinclude\n"
+    vault_block = "# GitGhost\n.gitghost_private/\n.gitghostinclude\n"
     
     def block_present(content):
-        return ".gitvault_private/" in content and ".gitvaultinclude" in content
+        return ".gitghost_private/" in content and ".gitghostinclude" in content
     
     if os.path.exists(gitignore_path):
         with open(gitignore_path, "r") as f:
@@ -288,13 +294,13 @@ def init():
             content += vault_block
             with open(gitignore_path, "w") as f:
                 f.write(content)
-            click.echo("Added GitVault block to .gitignore")
+            click.echo("Added GitGhost block to .gitignore")
         else:
-            click.echo("GitVault block already present in .gitignore")
+            click.echo("GitGhost block already present in .gitignore")
     else:
         with open(gitignore_path, "w") as f:
             f.write(vault_block)
-        click.echo("Created .gitignore with GitVault block")
+        click.echo("Created .gitignore with GitGhost block")
 
 if __name__ == "__main__":
     cli()

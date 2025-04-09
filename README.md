@@ -1,87 +1,83 @@
-# GitVault
+# GitGhost
 
-A simple way to keep your private files safe while sharing your code with the world.
-
----
-
-## Overview
-
-GitVault helps you **manage sensitive files and folders** that you don’t want in your public Git repo. It lets you back up and version those private files in a separate, secure repo — so you get the best of both worlds.
+A simple CLI tool to securely manage private files and folders ignored in your public Git repositories.
 
 ---
 
-## What it does
+## Why use GitGhost?
 
-- Use a `.gitvaultinclude` file to list private stuff you want to track (which should also be in `.gitignore`)
-- `gitvault init` sets up GitVault in your project, creating the private repo and config files
-- `gitvault status` shows what’s changed in your private files since your last save
-- `gitvault save` commits and pushes those private changes to your private repo
-- `gitvault discard` lets you throw away private changes you don’t want to keep
-- Keeps secrets out of your public repo, no surprises
-- Manual control — **you decide when to save, discard, or check**
+- **Keep sensitive files private:** Manage secrets, configs, or personal files outside your public repo.
+- **Seamless Git integration:** Works alongside your existing Git workflow.
+- **Simple commands:** Easily save, check status, or discard private changes.
+- **Separate private repo:** Keeps your private data secure and versioned.
+- **Cross-platform:** Designed for Linux, works on any system with Python 3.10+.
 
 ---
 
-## How to use it
+## Requirements
 
-1. **Initialize GitVault**
-
-Run this once in your repo to set things up:
-
-```bash
-gitvault init
-```
-
-2. **List your private files**
-
-Create a `.gitvaultinclude` file with paths to your private files or folders (make sure they’re also in `.gitignore`):
-
-```
-secrets.env
-private_notes/
-config/dev.yaml
-```
-
-3. **See what’s changed**
-
-```bash
-gitvault status
-```
-
-4. **Save your private changes**
-
-```bash
-gitvault save
-```
-
-5. **Discard private changes you don’t want**
-
-```bash
-gitvault discard
-```
-
-That’s it — your sensitive stuff is safely versioned, but never exposed.
+- **Python 3.10 or higher**
+- Compatible with Ubuntu/Linux systems
+- An existing Git repository
 
 ---
 
 ## Installation
 
-_Coming soon on PyPI!_  
-For now, just clone this repo and install the dependencies:
+Install GitGhost directly from PyPI:
 
 ```bash
-pip install -r requirements.txt
+pip install gitghost
 ```
 
 ---
 
-## Contributing
+## Quick Start
 
-Ideas, bugs, or want to help out?  
-Pull requests are welcome! Or just open an issue and let’s chat.
+Initialize GitGhost in your project:
+
+```bash
+gitghost init
+```
+
+Check status of private files:
+
+```bash
+gitghost status
+```
+
+Save private changes:
+
+```bash
+gitghost save
+```
+
+Discard private changes:
+
+```bash
+gitghost discard
+```
+
+---
+
+## How it works
+
+- Specify private files/folders in `.gitghostinclude` (which should also be in `.gitignore`).
+- GitGhost manages a **separate private repository** for these files.
+- `gitghost save` commits and pushes private changes.
+- `gitghost status` shows private file changes.
+- Keeps private data out of your public repo, but safely versioned.
+
+---
+
+## Links
+
+- **PyPI:** (Coming soon)
+- **Source Code:** [https://github.com/decodingchris/gitghost](https://github.com/decodingchris/gitghost)
+- **Issue Tracker:** [https://github.com/decodingchris/gitghost/issues](https://github.com/decodingchris/gitghost/issues)
 
 ---
 
 ## License
 
-MIT License
+This project is licensed under the **MIT License**. See the [LICENSE](https://opensource.org/licenses/MIT) file for details.

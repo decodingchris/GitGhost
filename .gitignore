@@ -179,9 +179,9 @@ memory-bank/
 # Roomodes
 .roomodes
 
-# GitVault
-.gitvault_private/
-.gitvaultinclude
+# GitGhost
+.gitghost_private/
+.gitghostinclude
 
 # VS Code
 .vscode/
