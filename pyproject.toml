@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitghost"
-version = "1.0.3"
+version = "1.0.4"
 description = "Private version control for your Git ignored files."
 authors = [
     { name = "Decoding Chris" }
@@ -29,3 +29,7 @@ classifiers = [
 
 [project.scripts]
 gitghost = "gitghost.cli:cli"
+
+[project.urls]
+Homepage = "https://github.com/decodingchris/GitGhost"
+Issues = "https://github.com/decodingchris/gitghost/issues"
