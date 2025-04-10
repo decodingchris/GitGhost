@@ -72,7 +72,7 @@ gitghost discard
 
 ## Links
 
-- **PyPI:** (Coming soon)
+- **PyPI:** [https://pypi.org/project/gitghost/](https://pypi.org/project/gitghost/)
 - **Source Code:** [https://github.com/decodingchris/gitghost](https://github.com/decodingchris/gitghost)
 - **Issue Tracker:** [https://github.com/decodingchris/gitghost/issues](https://github.com/decodingchris/gitghost/issues)
 
