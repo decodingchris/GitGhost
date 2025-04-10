@@ -282,3 +282,9 @@ def test_cli_entry_point():
     from gitghost import cli as cli_module
     with pytest.raises(SystemExit):
         cli_module.cli()
+
+def test_help_command(runner):
+    result = runner.invoke(cli, ['help'])
+    assert result.exit_code == 0
+    assert 'Usage:' in result.output
+    assert 'Commands:' in result.output

@@ -2,8 +2,6 @@
 
 Private version control for your Git ignored files.
 
----
-
 ## Why use GitGhost?
 
 - **Keep sensitive files private:** Manage secrets, configs, or personal files outside your public repo.
@@ -12,15 +10,11 @@ Private version control for your Git ignored files.
 - **Separate private repo:** Keeps your private data secure and versioned.
 - **Cross-platform:** Designed for Linux, works on any system with Python 3.10+.
 
----
-
 ## Requirements
 
 - Python 3.10 or higher
 - Git installed
 - GitHub CLI (`gh`) is required for private repo automation
-
----
 
 ## Installation
 
@@ -30,9 +24,7 @@ Install GitGhost directly from PyPI:
 pip install gitghost
 ```
 
----
-
-## Quick Start
+## Commands
 
 Initialize GitGhost in your project:
 
@@ -58,7 +50,11 @@ Discard private changes:
 gitghost discard
 ```
 
----
+Get help and list all commands:
+
+```bash
+gitghost help
+```
 
 ## How it works
 
@@ -68,15 +64,11 @@ gitghost discard
 - `gitghost status` shows private file changes.
 - Keeps private data out of your public repo, but safely versioned.
 
----
-
 ## Links
 
 - **PyPI:** [https://pypi.org/project/gitghost/](https://pypi.org/project/gitghost/)
 - **Source Code:** [https://github.com/decodingchris/gitghost](https://github.com/decodingchris/gitghost)
 - **Issue Tracker:** [https://github.com/decodingchris/gitghost/issues](https://github.com/decodingchris/gitghost/issues)
-
----
 
 ## License
 

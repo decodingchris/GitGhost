@@ -301,6 +301,12 @@ def init():
         with open(gitignore_path, "w") as f:
             f.write(vault_block)
         click.echo("Created .gitignore with GitGhost block")
+@cli.command()
+@click.pass_context
+def help(ctx):
+    """Show this message and exit."""
+    click.echo(cli.get_help(ctx))
+
 
 if __name__ == "__main__":
     cli()
